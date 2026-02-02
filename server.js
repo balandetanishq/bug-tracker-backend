@@ -13,7 +13,6 @@ app.use(express.json());
 /* ---------------- ROUTES ---------------- */
 const authRoutes = require("./routes/auth");
 const projectRoutes = require("./routes/projectRoutes");
-const bugRoutes = require("./routes/bugRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
