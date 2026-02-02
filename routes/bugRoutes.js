@@ -1,15 +1,10 @@
-import express from "express";
-import {
-  getBugs,
-  createBug,
-  updateBugStatus
-} from "../controllers/bugController.js";
-import auth from "../middleware/auth.js";
-
+const express = require("express");
 const router = express.Router();
+const Bug = require("../models/Bug");
+const auth = require("../middleware/auth");
 
-router.get("/", auth, getBugs);
-router.post("/", auth, createBug);
-router.put("/:id/status", auth, updateBugStatus);
+router.post("/", auth, async (req, res) => {
+  res.json({ message: "BUG ROUTE HIT" });
+});
 
-export default router;
+module.exports = router;
