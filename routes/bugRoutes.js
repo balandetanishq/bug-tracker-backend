@@ -1,27 +1,15 @@
-const express = require("express");
+import express from "express";
+import {
+  getBugs,
+  createBug,
+  updateBugStatus
+} from "../controllers/bugController.js";
+import auth from "../middleware/auth.js";
+
 const router = express.Router();
-const Bug = require("../models/bug");
-const auth = require("../middleware/authMiddleware");
 
-// UPDATE BUG STATUS
-router.put("/:id/status", auth, async (req, res) => {
-  try {
-    const { status } = req.body;
+router.get("/", auth, getBugs);
+router.post("/", auth, createBug);
+router.put("/:id/status", auth, updateBugStatus);
 
-    const bug = await Bug.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
-
-    if (!bug) {
-      return res.status(404).json({ message: "Bug not found" });
-    }
-
-    res.json(bug);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-module.exports = router;
+export default router;
