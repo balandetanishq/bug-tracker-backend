@@ -6,6 +6,7 @@ const {PORT} = require("./config/config");
 const projectRoutes = require("./routes/projectRoutes");
 const bugRoutes = require("./routes/bugRoutes");
 const authRoutes = require("./routes/auth");
+const PORT = process.env.PORT ||5000;
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/bugs", require("./routes/bugRoutes"));
 
 app.get("/", (req, res) => {
   res.send("Bug Tracker API running");
@@ -28,6 +30,6 @@ app.get("/", (req, res) => {
 
 // Server
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+app.listen(PORT, () => {
+  console.log("Server running on port $ {PORT}");
 });
