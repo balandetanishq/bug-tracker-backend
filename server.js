@@ -1,35 +1,39 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
-const connectDB = require("./config/db");
-const {PORT} = require("./config/config");
-
-const projectRoutes = require("./routes/projectRoutes");
-const bugRoutes = require("./routes/bugRoutes");
-const authRoutes = require("./routes/auth");
-const PORT = process.env.PORT ||5000;
+require("dotenv").config();
 
 const app = express();
 
-// DB
-connectDB();
-
-// Middleware
+/* ---------------- MIDDLEWARE ---------------- */
 app.use(cors());
 app.use(express.json());
 
-// Routes
+/* ---------------- ROUTES ---------------- */
+const authRoutes = require("./routes/auth");
+const projectRoutes = require("./routes/projectRoutes");
+const bugRoutes = require("./routes/bugRoutes");
 
+app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/bugs", require("./routes/bugRoutes"));
 
+/* ---------------- ROOT CHECK ---------------- */
 app.get("/", (req, res) => {
-  res.send("Bug Tracker API running");
+  res.send("Bug Tracker Backend Running");
 });
 
-// Server
+/* ---------------- DB + SERVER ---------------- */
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log("Server running on port $ {PORT}");
-});
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
