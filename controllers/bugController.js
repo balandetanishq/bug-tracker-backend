@@ -1,4 +1,4 @@
-const Bug = require("../models/bug");
+const Bug = require("../models/Bug");
 
 // GET all bugs
 exports.getBugs = async (req, res) => {
