@@ -7,24 +7,20 @@ const bugSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     description: {
       type: String,
-      default: "",
+      required: true,
     },
-
     status: {
       type: String,
       enum: ["Open", "In Progress", "Closed"],
       default: "Open",
     },
-
     priority: {
       type: String,
       enum: ["Low", "Medium", "High"],
       default: "Medium",
     },
-
     project: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
