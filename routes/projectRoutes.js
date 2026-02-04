@@ -1,17 +1,35 @@
-const express = require("express");
+import express from "express";
+import Project from "../models/project.js";
+import auth from "../middleware/auth.js";
+
 const router = express.Router();
 
-const authMiddleware = require("../middleware/authMiddleware");
+/* CREATE PROJECT */
+router.post("/", auth, async (req, res) => {
+  try {
+    const { name, description } = req.body;
 
+    const project = new Project({
+      name,
+      description,
+    });
 
-const {
-  getProjects,
-  createProject,
-  deleteProject,
-} = require("../controllers/projectController");
+    await project.save();
 
-router.get("/", getProjects);
-router.post("/", authMiddleware, createProject);
-router.delete("/:id", deleteProject);
+    res.status(201).json(project);
+  } catch (err) {
+    res.status(500).json({ message: "Error creating project" });
+  }
+});
 
-module.exports = router;
+/* GET ALL PROJECTS */
+router.get("/", auth, async (req, res) => {
+  try {
+    const projects = await Project.find();
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching projects" });
+  }
+});
+
+export default router;

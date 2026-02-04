@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const bugSchema = new mongoose.Schema(
   {
@@ -7,27 +7,32 @@ const bugSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     description: {
       type: String,
-      required: true,
+      default: "",
     },
+
     status: {
       type: String,
       enum: ["Open", "In Progress", "Closed"],
       default: "Open",
     },
+
     priority: {
       type: String,
       enum: ["Low", "Medium", "High"],
       default: "Medium",
     },
+
     project: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
-      required: true,
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Bug", bugSchema);
+const Bug = mongoose.model("Bug", bugSchema);
+
+export default Bug;
