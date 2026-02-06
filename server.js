@@ -11,31 +11,16 @@ dotenv.config();
 
 const app = express();
 
-/* ---- FORCE PREFLIGHT FIRST ---- */
-app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    "https://bug-tracker-frontend-r46k.onrender.com"
-  );
+/* ---- UPDATED CORS CONFIGURATION ---- */
+app.use(cors({
+  origin: "https://bug-tracker-frontend-r46k.onrender.com",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  credentials: true
+}));
 
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
+// This must come BEFORE your routes
+app.use(express.json());
 
 /* ---- NORMAL MIDDLEWARE ---- */
 app.use(express.json());
