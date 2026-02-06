@@ -11,34 +11,45 @@ dotenv.config();
 
 const app = express();
 
-/* ---- UPDATED CORS CONFIGURATION ---- */
-app.use(cors({
-  origin: "https://bug-tracker-frontend-r46k.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  credentials: true
-}));
+/* -------------------- CORS (SIMPLE & SAFE) -------------------- */
 
-// This must come BEFORE your routes
+app.use(
+  cors({
+    origin: [
+      "https://bug-tracker-frontend-r46k.onrender.com",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  })
+);
+
+/* Handle preflight */
+app.options("*", cors());
+
+/* -------------------------------------------------------------- */
+
 app.use(express.json());
 
-/* ---- NORMAL MIDDLEWARE ---- */
-app.use(express.json());
-
-/* ---- ROUTES ---- */
+/* Routes */
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
 
+/* Root test */
+app.get("/", (req, res) => {
+  res.send("Backend running");
+});
+
 const PORT = process.env.PORT || 10000;
 
+/* DB */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log("Server running on port", PORT);
     });
   })
   .catch((err) => console.error(err));
