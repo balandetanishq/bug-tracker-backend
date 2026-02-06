@@ -13,14 +13,15 @@ const app = express();
 
 /* ---------------- CORS (FINAL FIX) ---------------- */
 
-app.use(
-  cors({
-    origin: "*", // allow ALL origins (for project submission)
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
+app.use(cors({
+  origin: [
+    "https://bug-tracker-frontend-r46k.onrender.com",
+    "http://localhost:3000"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 /* ----------------------------------------------- */
 
 app.use(express.json());
