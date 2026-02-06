@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
@@ -10,41 +11,33 @@ dotenv.config();
 
 const app = express();
 
-/* ===============================
-   MANUAL CORS MIDDLEWARE
-================================ */
-app.use(cors({
-  origin: [
-    "https://bug-tracker-frontend-r46k.onrender.com",
-    "http://localhost:3000"
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+/* ---------------- CORS (FINAL FIX) ---------------- */
 
-app.options("*", cors());
+app.use(
+  cors({
+    origin: "*", // allow ALL origins (for project submission)
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-/* ROUTES */
+/* ----------------------------------------------- */
+
+app.use(express.json());
+
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
 
-/* TEST */
-app.get("/", (req, res) => {
-  res.send("Backend alive");
-});
-
 const PORT = process.env.PORT || 10000;
 
-/* DB + SERVER */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
 
     app.listen(PORT, () => {
-      console.log("Server running on", PORT);
+      console.log("Server running on port", PORT);
     });
   })
   .catch((err) => console.error(err));
