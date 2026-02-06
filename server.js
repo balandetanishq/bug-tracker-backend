@@ -11,29 +11,37 @@ dotenv.config();
 
 const app = express();
 
-/* ====== CORS FIX (NO MORE BLOCKING) ====== */
+/* ===============================
+   CORS (FULL FIX)
+================================ */
 
-app.use(
-  cors({
-    origin: [
-      "https://bug-tracker-frontend-r46k.onrender.com",
-      "http://localhost:3000"
-    ],
-    credentials: true
-  })
-);
+const corsOptions = {
+  origin: "https://bug-tracker-frontend-r46k.onrender.com",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
 
-/* ====== MIDDLEWARE ====== */
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // <-- THIS LINE IS THE MAGIC
+
+/* ===============================
+   MIDDLEWARE
+================================ */
 
 app.use(express.json());
 
-/* ====== ROUTES ====== */
+/* ===============================
+   ROUTES
+================================ */
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
 
-/* ====== SERVER ====== */
+/* ===============================
+   SERVER
+================================ */
 
 const PORT = process.env.PORT || 5000;
 
