@@ -11,7 +11,30 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+import cors from "cors";
+
+const allowedOrigins = [
+  "https://bug-tracker-frontend-r46k.onrender.com",
+  "http://localhost:3000"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = "CORS blocked: " + origin;
+        return callback(new Error(msg), false);
+      }
+
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
