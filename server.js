@@ -11,8 +11,6 @@ dotenv.config();
 
 const app = express();
 
-import cors from "cors";
-
 const allowedOrigins = [
   "https://bug-tracker-frontend-r46k.onrender.com",
   "http://localhost:3000"
