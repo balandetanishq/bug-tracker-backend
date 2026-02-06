@@ -11,25 +11,36 @@ dotenv.config();
 
 const app = express();
 
-/* SIMPLE CORS - NO DRAMA */
-app.use(
-  cors({
-    origin: [
-      "https://bug-tracker-frontend-r46k.onrender.com",
-      "http://localhost:3000"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
-  })
-);
+/* ---- FORCE PREFLIGHT FIRST ---- */
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://bug-tracker-frontend-r46k.onrender.com"
+  );
 
-/* IMPORTANT: HANDLE PREFLIGHT */
-app.options("*", cors());
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+/* ---- NORMAL MIDDLEWARE ---- */
 app.use(express.json());
 
-/* ROUTES */
+/* ---- ROUTES ---- */
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
