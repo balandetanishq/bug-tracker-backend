@@ -12,18 +12,19 @@ dotenv.config();
 const app = express();
 
 /* ===============================
-   CORS (FULL FIX)
+   CORS — WORKING VERSION
 ================================ */
 
-const corsOptions = {
-  origin: "https://bug-tracker-frontend-r46k.onrender.com",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-};
+app.use(
+  cors({
+    origin: "*", // allow ALL origins (temporary)
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // <-- THIS LINE IS THE MAGIC
+// Preflight support
+app.options("*", cors());
 
 /* ===============================
    MIDDLEWARE
