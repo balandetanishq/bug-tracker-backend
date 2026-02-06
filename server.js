@@ -11,45 +11,39 @@ dotenv.config();
 
 const app = express();
 
-/* -------------------- CORS (SIMPLE & SAFE) -------------------- */
-
+/* ✅ SIMPLE CORS (NO CUSTOM LOGIC) */
 app.use(
   cors({
-    origin: [
-      "https://bug-tracker-frontend-r46k.onrender.com",
-      "http://localhost:3000",
-    ],
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/* Handle preflight */
+/* ✅ HANDLE PREFLIGHT */
 app.options("*", cors());
-
-/* -------------------------------------------------------------- */
 
 app.use(express.json());
 
-/* Routes */
+/* ROUTES */
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/bugs", bugRoutes);
 
-/* Root test */
+/* TEST ROUTE */
 app.get("/", (req, res) => {
-  res.send("Backend running");
+  res.send("Backend is running");
 });
 
 const PORT = process.env.PORT || 10000;
 
-/* DB */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
 
     app.listen(PORT, () => {
-      console.log("Server running on port", PORT);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => console.error(err));
