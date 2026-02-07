@@ -1,65 +1,139 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-
-// Routes
-import authRoutes from "./routes/auth.js";
-import bugRoutes from "./routes/bugRoutes.js";
 
 dotenv.config();
 
 const app = express();
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
 
-/* =========================
-   MIDDLEWARE
-========================= */
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: "*", // allow all (safe for demo/project)
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// ================= MODELS =================
 
-/* =========================
-   DEBUG ENV (IMPORTANT)
-========================= */
-console.log("MONGO_URI =", process.env.MONGO_URI ? "FOUND ✅" : "NOT FOUND ❌");
-console.log("JWT_SECRET =", process.env.JWT_SECRET ? "FOUND ✅" : "NOT FOUND ❌");
-
-/* =========================
-   MONGODB CONNECT
-========================= */
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected ✅");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error ❌", err);
-  });
-
-/* =========================
-   TEST ROUTE
-========================= */
-app.get("/", (req, res) => {
-  res.send("Bug Tracker Backend Running 🚀");
+const userSchema = new mongoose.Schema({
+  email: String,
+  password: String,
 });
 
-/* =========================
-   ROUTES
-========================= */
-app.use("/api/auth", authRoutes);
-app.use("/api/bugs", bugRoutes);
+const bugSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  status: {
+    type: String,
+    default: "Open",
+  },
+  userId: String,
+});
 
-/* =========================
-   SERVER
-========================= */
-const PORT = process.env.PORT || 10000;
+const User = mongoose.model("User", userSchema);
+const Bug = mongoose.model("Bug", bugSchema);
+
+// ================= AUTH =================
+
+const auth = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) return res.status(401).json("No token");
+
+  try {
+    const decoded = jwt.verify(
+      token.split(" ")[1],
+      process.env.JWT_SECRET
+    );
+
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json("Invalid token");
+  }
+};
+
+// ================= ROUTES =================
+
+// Register
+app.post("/api/auth/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  const exist = await User.findOne({ email });
+  if (exist) return res.status(400).json("User exists");
+
+  const hash = await bcrypt.hash(password, 10);
+
+  await User.create({ email, password: hash });
+
+  res.json("Registered");
+});
+
+// Login
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json("User not found");
+
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(400).json("Wrong password");
+
+  const token = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET
+  );
+
+  res.json({ token });
+});
+
+// Get bugs
+app.get("/api/bugs", auth, async (req, res) => {
+  const bugs = await Bug.find({ userId: req.user.id });
+  res.json(bugs);
+});
+
+// Add bug
+app.post("/api/bugs", auth, async (req, res) => {
+  const { title, description } = req.body;
+
+  const bug = await Bug.create({
+    title,
+    description,
+    userId: req.user.id,
+  });
+
+  res.json(bug);
+});
+
+// Delete bug
+app.delete("/api/bugs/:id", auth, async (req, res) => {
+  await Bug.findByIdAndDelete(req.params.id);
+  res.json("Deleted");
+});
+
+// Update status
+app.put("/api/bugs/:id", auth, async (req, res) => {
+  const { status } = req.body;
+
+  await Bug.findByIdAndUpdate(req.params.id, {
+    status,
+  });
+
+  res.json("Updated");
+});
+
+// ================= START =================
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Mongo Connected"))
+  .catch(err => console.error(err));
+
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} ✅`);
+  console.log("Server running on", PORT);
 });
