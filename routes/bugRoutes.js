@@ -12,10 +12,18 @@ router.get("/test", (req, res) => {
 /* CREATE BUG */
 router.post("/", auth, async (req, res) => {
   try {
-    const bug = await Bug.create(req.body);
-    res.status(201).json(bug);
+    const { title, description, priority } = req.body;
+
+    const bug = await Bug.create({
+      title,
+      description,
+      priority: priority || "Medium",
+      createdBy: req.user.id,
+    });
+
+    res.json(bug);
   } catch (err) {
-    res.status(500).json({ message: "Create failed" });
+    res.status(500).json({ message: "Failed to create bug" });
   }
 });
 
@@ -46,6 +54,20 @@ router.put("/:id", auth, async (req, res) => {
     res.json(bug);
   } catch (err) {
     res.status(500).json({ message: "Update failed" });
+  }
+});
+
+router.patch("/:id/priority", auth, async (req, res) => {
+  try {
+    const bug = await Bug.findByIdAndUpdate(
+      req.params.id,
+      { priority: req.body.priority },
+      { new: true }
+    );
+
+    res.json(bug);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update priority" });
   }
 });
 
