@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 // Routes
 import authRoutes from "./routes/auth.js";
-import bugRoutes from "./routes/bug.js";
+import bugRoutes from "./routes/bugRoutes.js";
 
 dotenv.config();
 
