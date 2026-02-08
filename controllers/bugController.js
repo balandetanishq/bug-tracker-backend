@@ -1,29 +1,55 @@
-const Bug = require("../models/Bug");
+import Bug from "../models/Bug.js";
 
-// GET all bugs
-exports.getBugs = async (req, res) => {
+/* Get All Bugs */
+export const getBugs = async (req, res) => {
   try {
-    const bugs = await Bug.find().populate("project", "name");
-    res.status(200).json(bugs);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const bugs = await Bug.find({ userId: req.user.id });
+    res.json(bugs);
+  } catch (err) {
+    res.status(500).json("Server Error");
   }
 };
 
-// CREATE bug
-exports.createBug = async (req, res) => {
+/* Create Bug */
+export const createBug = async (req, res) => {
   try {
-    const { title, project } = req.body;
+    const { title, description, project, assignedTo } = req.body;
 
-    if (!title || !project) {
-      return res.status(400).json({
-        message: "Title and project are required",
-      });
-    }
+    const bug = await Bug.create({
+      title,
+      description,
+      project,
+      assignedTo,
+      userId: req.user.id,
+    });
 
-    const bug = await Bug.create({ title, project });
-    res.status(201).json(bug);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json(bug);
+  } catch (err) {
+    res.status(500).json("Add Failed");
+  }
+};
+
+/* Delete Bug */
+export const deleteBug = async (req, res) => {
+  try {
+    await Bug.findByIdAndDelete(req.params.id);
+    res.json("Deleted");
+  } catch {
+    res.status(500).json("Delete Failed");
+  }
+};
+
+/* Update Status */
+export const updateBug = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    await Bug.findByIdAndUpdate(req.params.id, {
+      status,
+    });
+
+    res.json("Updated");
+  } catch {
+    res.status(500).json("Update Failed");
   }
 };

@@ -5,23 +5,37 @@ const bugSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
   description: {
     type: String,
+    default: "",
   },
+
+  project: {
+    type: String,
+    default: "General",
+  },
+
+  assignedTo: {
+    type: String,
+    default: "Unassigned",
+  },
+
   status: {
     type: String,
-    enum: ["Open", "In Progress", "Closed"],
-    default: "Open",
+    default: "ToDo",
+    enum: ["ToDo", "InProgress", "Done"],
   },
-  priority: {
+
+  userId: {
     type: String,
-    enum: ["Low", "Medium", "High"],
-    default: "Medium",
+    required: true,
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
-}, { timestamps: true });
+});
 
 export default mongoose.model("Bug", bugSchema);
