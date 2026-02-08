@@ -25,10 +25,16 @@ const userSchema = new mongoose.Schema({
 const bugSchema = new mongoose.Schema({
   title: String,
   description: String,
+
+  project: String,
+  assignedTo: String,
+
   status: {
     type: String,
-    default: "Open",
+    enum: ["ToDo", "InProgress", "Done"],
+    default: "ToDo",
   },
+
   userId: String,
 });
 
@@ -97,11 +103,14 @@ app.get("/api/bugs", auth, async (req, res) => {
 
 // Add bug
 app.post("/api/bugs", auth, async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, project, assignedTo, status } = req.body;
 
   const bug = await Bug.create({
     title,
     description,
+    project,
+    assignedTo,
+    status: status || "ToDo",
     userId: req.user.id,
   });
 
